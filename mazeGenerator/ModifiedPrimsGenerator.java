@@ -101,6 +101,9 @@ public class ModifiedPrimsGenerator implements MazeGenerator {
 	                vert_walls_removed[wall_row][wall_col + 1] = true;                    
 	            }
 	            
+	            System.out.println("current cell x: " + current_cell.c + " y: " + current_cell.r);
+	            System.out.println("---------------------------------");
+
 	            //now add the new current cell's walls to the list
 	            //cells_finished++;
 	            final int current_row = current_cell.r;
@@ -130,6 +133,15 @@ public class ModifiedPrimsGenerator implements MazeGenerator {
 	} // end of generateMaze()
 	
 	private class WallPiece{
+		/**
+		 * True if the wall is present in the maze. Otherwise false.
+		 */
+		public boolean present = true;
+		
+		/**
+		 * Used only for visualization functions.
+		 */
+		public boolean drawn = false;
         /**
          * Wall piece for the west side of a cell.
          */
