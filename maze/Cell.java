@@ -9,6 +9,7 @@ package maze;
  * and same wall object are shared by two cell objects next to the wall.
  */
 public class Cell {
+
 	/**
 	 * row coordinate
 	 */
@@ -44,6 +45,12 @@ public class Cell {
 	 * @param r	Row coordinate in the maze
 	 * @param c Column coordinate in the maze
 	 */
+	
+
+    //added by haoquan
+	public boolean isVisited = false;
+	
+	
 	public Cell(int r, int c) {
 		this.r = r;
 		this.c = c;
