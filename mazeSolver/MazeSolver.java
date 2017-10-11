@@ -17,7 +17,7 @@ public interface MazeSolver
 	 */
 	public abstract void solveMaze(Maze maze);
 	
-
+	
 	/**
 	 * Use after solveMaze(maze), to check whether the maze is solved.
 	 * @return True if solved. Otherwise false.
