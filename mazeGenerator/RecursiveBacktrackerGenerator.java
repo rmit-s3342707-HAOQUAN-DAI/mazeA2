@@ -16,70 +16,171 @@ public class RecursiveBacktrackerGenerator implements MazeGenerator {
 		visited = new boolean[maze.sizeR][maze.sizeC];
 		visited[maze.entrance.r][maze.entrance.c] = true;
 		int visits = 0;
-		while(visits < visitedCount || !q.isEmpty()) {
-			while((cell.c+1 < maze.sizeC && !visited[cell.r][cell.c+1])||
-				  (cell.c-1 >= 0 && !visited[cell.r][cell.c-1])||
-		        	(cell.r+1 < maze.sizeR && !visited[cell.r+1][cell.c])||
-				  (cell.r-1 >= 0 && !visited[cell.r-1][cell.c])) {
-				int rand = (int)(Math.random() * 4 + 1);
-				System.out.println("Direction: " + rand + " x: " + cell.c + " y: " + cell.r);
-				System.out.println("--------------------------------");
-				// check up
-				if (rand == 1 && cell.r+1 < maze.sizeR && !visited[cell.r+1][cell.c]) {
-					// remove the upper wall
-					maze.map[cell.r][cell.c].wall[NORTH].present = false;
-					Cell nxCell = new Cell(cell.r+1, cell.c);
-					visited[cell.r+1][cell.c] = true;
-					q.add(nxCell);
-					visits++;
-					cell = nxCell;
-				}
-				// check down
-				if (rand == 2 && cell.r-1 >= 0 && !visited[cell.r-1][cell.c]) {
-					// remove the wall below
-					maze.map[cell.r][cell.c].wall[SOUTH].present = false;
-					Cell nxCell = new Cell(cell.r-1, cell.c);
-					visited[cell.r-1][cell.c] = true;
-					q.add(nxCell);
-					visits++;
-					cell = nxCell;
-				}
-				// check left
-				if (rand == 3 && cell.c-1 >= 0 && !visited[cell.r][cell.c-1]) {
-					// remove the west wall
-					maze.map[cell.r][cell.c].wall[WEST].present = false;
-					Cell nxCell = new Cell(cell.r, cell.c-1);
-					visited[cell.r][cell.c-1] = true;
-					q.add(nxCell);
-					visits++;
-					cell = nxCell;
-				}
-				// check right
-				if (rand == 4 && cell.c+1 < maze.sizeC && !visited[cell.r][cell.c+1]) {
-					// removed the wall
-					maze.map[cell.r][cell.c].wall[EAST].present = false;
-					Cell nxCell = new Cell(cell.r, cell.c+1);
-					visited[cell.r][cell.c+1] = true;
-					q.add(nxCell);
-					visits++;
-					cell = nxCell;
-				}
-				// if has tunnel
-				if (maze.type == TUNNEL && cell.tunnelTo != null ) {
-					Cell nxCell = cell.tunnelTo;
-					if (!visited[nxCell.r][nxCell.c]) {
-						visited[nxCell.r][nxCell.c] = true;
+		
+		
+		
+		if(maze.type == HEX){
+			
+			while (visits < visitedCount || !q.isEmpty()){
+				while((cell.c+ (1/2) < maze.sizeC && !visited[cell.r][cell.c+ (1/2)])||
+					  (cell.c-(1/2) >= 0 && !visited[cell.r][cell.c-(1/2)])||
+				      (cell.r+1 < maze.sizeR && !visited[cell.r+1][cell.c])||
+					  (cell.r-1 >= 0 && !visited[cell.r-1][cell.c])) {
+							int HexRand	= (int)(Math.random()* 6 + 1);
+							System.out.println("Direction: " + HexRand + " x: " + (cell.c+ 1/2) + " y: " + cell.r);
+							System.out.println("---------------------------------------------------------");
+			
+						//check East
+						//same row, one cell right, so + 1
+						if (HexRand == 1 && cell.c+1 < maze.sizeR && !visited[cell.r][(cell.c+1/2)]) {
+							// remove the east wall
+							
+							maze.map[cell.r][cell.c].wall[EAST].present = false;
+							Cell nxCell = new Cell(cell.r, cell.c+1);
+							visited[cell.r][cell.c+1] = true;
+							q.add(nxCell);
+							visits++;
+							cell = nxCell;
+						}
+						
+						
+						//check NorthEast
+						//one row up, half cell right, so r + 1, c + 1/2
+						if (HexRand == 2 && cell.r+1 < maze.sizeR && !visited[cell.r+1][cell.c+(1/2)]) {
+							// remove the northeast wall  
+							maze.map[cell.r][cell.c].wall[NORTHEAST].present = false;
+							Cell nxCell = new Cell(cell.r+1, cell.c+(1/2));
+							visited[cell.r+1][cell.c+(1/2)] = true;
+							q.add(nxCell);
+							visits++; 
+							cell = nxCell;
+						}
+						
+						//check NorthWest
+						//one row up, half cell left
+						if (HexRand == 3 && cell.r+1 < maze.sizeR && !visited[cell.r+1][cell.c-(1/2)]) {
+							// remove the northwest wall
+							maze.map[cell.r][cell.c].wall[NORTHWEST].present = false;
+							Cell nxCell = new Cell(cell.r+1, cell.c-(1/2));
+							visited[cell.r+1][cell.c+(1/2)] = true;
+							q.add(nxCell);
+							visits++;  
+							cell = nxCell;
+						}
+						
+						
+						//check West
+						//same row, one cell left
+						if (HexRand == 4 && cell.c-1 >= 0 && !visited[cell.r][cell.c-1]) {
+							// remove the west wall
+							maze.map[cell.r][cell.c].wall[WEST].present = false; 
+							Cell nxCell = new Cell(cell.r, cell.c-1);
+							visited[cell.r][cell.c-1] = true;
+							q.add(nxCell);
+							visits++;
+							cell = nxCell;
+						}
+						   
+						//check SouthWest
+						//one row down, half cell left
+						if (HexRand == 5 && cell.c-(1/2) >= 0 && !visited[cell.r-1][cell.c-(1/2)]) {
+							// remove the west wall
+							maze.map[cell.r][cell.c].wall[SOUTHWEST].present = false;
+							Cell nxCell = new Cell(cell.r-1, cell.c-(1/2));
+							visited[cell.r][cell.c-(1/2)] = true;
+							q.add(nxCell);
+							visits++;
+							cell = nxCell;
+						}
+						
+						//check SouthEast
+						//one row down, half cell right
+						if (HexRand == 5 && cell.c+(1/2) >= 0 && !visited[cell.r-1][cell.c+(1/2)]) {
+							// remove the west wall
+							maze.map[cell.r][cell.c].wall[SOUTHEAST].present = false;
+							Cell nxCell = new Cell(cell.r-1, cell.c+(1/2));
+							visited[cell.r][cell.c+(1/2)] = true;
+							q.add(nxCell);
+							visits++;
+							cell = nxCell;
+						}	
+				}				
+			}
+		}	
+			
+			
+			
+		
+		
+		
+//-------------------------type normal starts here----------------------------------------------------
+//----------------------------------------------------------------------------------------------------		
+		if(maze.type == NORMAL || maze.type == TUNNEL){
+			while(visits < visitedCount || !q.isEmpty()) {
+				while((cell.c+1 < maze.sizeC && !visited[cell.r][cell.c+1])||
+					  (cell.c-1 >= 0 && !visited[cell.r][cell.c-1])||
+			        	(cell.r+1 < maze.sizeR && !visited[cell.r+1][cell.c])||
+					  (cell.r-1 >= 0 && !visited[cell.r-1][cell.c])) {
+					int rand = (int)(Math.random() * 5 + 1);
+					System.out.println("Direction: " + rand + " x: " + cell.c + " y: " + cell.r);
+					System.out.println("--------------------------------");
+					// check up
+					if (rand == 1 && cell.r+1 < maze.sizeR && !visited[cell.r+1][cell.c]) {
+						// remove the upper wall
+						maze.map[cell.r][cell.c].wall[NORTH].present = false;
+						Cell nxCell = new Cell(cell.r+1, cell.c);
+						visited[cell.r+1][cell.c] = true;
 						q.add(nxCell);
 						visits++;
 						cell = nxCell;
 					}
+					// check down  
+					if (rand == 2 && cell.r-1 >= 0 && !visited[cell.r-1][cell.c]) {
+						// remove the wall below
+						maze.map[cell.r][cell.c].wall[SOUTH].present = false;
+						Cell nxCell = new Cell(cell.r-1, cell.c);
+						visited[cell.r-1][cell.c] = true;
+						q.add(nxCell);
+						visits++;
+						cell = nxCell;
+					}
+					// check left
+					if (rand == 3 && cell.c-1 >= 0 && !visited[cell.r][cell.c-1]) {
+						// remove the west wall
+						maze.map[cell.r][cell.c].wall[WEST].present = false;
+						Cell nxCell = new Cell(cell.r, cell.c-1);
+						visited[cell.r][cell.c-1] = true;
+						q.add(nxCell);
+						visits++;
+						cell = nxCell;
+					}
+					// check right
+					if (rand == 4 && cell.c+1 < maze.sizeC && !visited[cell.r][cell.c+1]) {
+						// removed the wall
+						maze.map[cell.r][cell.c].wall[EAST].present = false;
+						Cell nxCell = new Cell(cell.r, cell.c+1);
+						visited[cell.r][cell.c+1] = true;
+						q.add(nxCell);
+						visits++;
+						cell = nxCell;
+					}
+					// if has tunnel
+					if (rand ==5 && cell.tunnelTo != null && !visited[cell.tunnelTo.r][cell.tunnelTo.c]) {
+						//Cell nxCell = cell.tunnelTo;
+					
+							Cell nxCell = new Cell(cell.tunnelTo.r, cell.tunnelTo.c);
+							visited[cell.tunnelTo.r][cell.tunnelTo.c] = true;
+							q.add(nxCell);
+							visits++;
+							cell=nxCell;
+						
+					}
+				}
+				if (!q.isEmpty()) {
+					cell = q.pop();
 				}
 			}
-			if (!q.isEmpty()) {
-				cell = q.pop();
-			}
 		}
-
 	} // end of generateMaze()
 
 	// recursive-backtracking algorithm implementation

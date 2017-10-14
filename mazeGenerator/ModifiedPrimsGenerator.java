@@ -28,7 +28,8 @@ public class ModifiedPrimsGenerator implements MazeGenerator {
 		ArrayList<Cell> temp = new ArrayList<>();
 		//create frontier to store all neighbors
 		ArrayList<Cell> frontier = new ArrayList<>();
-		
+
+
 		//store random cell
 		for(int i=0; i<6; i++){
 			if(randCell.neigh[i] !=null){
@@ -37,6 +38,79 @@ public class ModifiedPrimsGenerator implements MazeGenerator {
 		}
 		
 		System.out.println("Size of current cell neighbour: " + frontier.size());
+		
+		
+		while(frontier.size()!=0){
+			//randomly select a cell from the frontier and remove it
+			int indexF = random.nextInt(frontier.size());
+			System.out.println("The random index from frontier is: " + indexF);
+			
+			Cell neighborF = frontier.get(indexF);
+			frontier.remove(neighborF);
+			neighborF.isVisited = true;
+			System.out.println("Location for available Cell is :" + neighborF.r + "" + neighborF.c);
+			
+			//find available neighbor of current neighbourF
+			for (int i =0; i < 6; i++){
+				if(neighborF.neigh[i] != null){
+					if(neighborF.neigh[i].isVisited){
+					
+					temp.add(neighborF.neigh[i]);
+				}
+				
+			}
+					
+		}
+		
+		System.out.println("The size of available neighbour is :" + temp.size());
+		int index_b =random.nextInt(temp.size());
+		Cell cellFromAvailableNeighbors = temp.get(index_b);
+		System.out.println("The index of random available index is :" + index_b);
+		System.out.println("The available Cell b location is :" + cellFromAvailableNeighbors.r + "" + cellFromAvailableNeighbors.c );
+		
+		//remove the wall
+		for(int i = 0; i < 6; i++){
+			for(int j = 0; j < 6; j++){
+				
+				if(neighborF.wall[i] == cellFromAvailableNeighbors.wall[j] && (neighborF.wall[i] != null)){
+					System.out.println(neighborF.wall[i]);
+					System.out.println(cellFromAvailableNeighbors.wall[j]);
+					neighborF.wall[i].present = false;
+					break;
+				}
+				
+			}
+			
+		}
+		
+		//Add cell to Cell set C
+		C.add(neighborF);
+		System.out.print("The size of current C is :" + C.size());
+		
+		temp.clear();
+		
+		for(int i = 0; i < 6; i++){
+			if(neighborF.neigh[i]!=null){
+				if(neighborF.neigh[i].isVisited &&(!frontier.contains(neighborF.neigh[i]))){
+				frontier.add(neighborF.neigh[i]);
+				}
+			}
+		}
+		System.out.println("The size of current frontier is : " + frontier.size());
+		System.out.println("----------------------------------------------------");
+		}
+	
+		
+
+		//store random cell
+		for(int i=0; i<6; i++){
+			if(randCell.neigh[i] !=null){
+				frontier.add(randCell.neigh[i]);
+			}			
+		}
+		
+		System.out.println("Size of current cell neighbour: " + frontier.size());
+		
 		
 		while(frontier.size()!=0){
 			//randomly select a cell from the frontier and remove it
@@ -98,7 +172,7 @@ public class ModifiedPrimsGenerator implements MazeGenerator {
 		System.out.println("----------------------------------------------------");
 		}
 	}	
-	//end of generateMaze()
+}	//end of generateMaze()
 //example 2 ends here -----------------------------
 //-------------------------------------------------
 	

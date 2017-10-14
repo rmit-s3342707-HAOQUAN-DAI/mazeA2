@@ -197,7 +197,7 @@ public class HexMaze extends NormalMaze {
                 Queue<Cell> queue = new LinkedList<Cell>();
 
                 queue.add(entrance);
-                stepCount[entrance.r][entrance.c] = 1;
+                stepCount[entrance.r][entrance.c] = 1; 
 
                 while (!queue.isEmpty()) {
                         Cell cell = queue.poll();
