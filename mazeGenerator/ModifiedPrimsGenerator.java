@@ -7,16 +7,14 @@ import maze.Cell;
 
 public class ModifiedPrimsGenerator implements MazeGenerator {
 	private boolean[][] visited;
+	private boolean[][] explored;
 	private int visitedCount; 
 	@Override 
 	public void generateMaze(Maze maze) {
 //		ArrayDeque<Cell> q = new ArrayDeque<>();//save the visited cell
 //		Cell cell = new Cell(maze.entrance.r, maze.entrance.c);
 //		q.push(cell);
-//		
-			
-		
-		
+
 		// TODO Auto-generated method stub
 		Random random = new Random();
 
@@ -28,20 +26,57 @@ public class ModifiedPrimsGenerator implements MazeGenerator {
 		//C.add(maze.entrance); //add to cell
 		visited = new boolean[maze.sizeR][maze.sizeC];
 		visited[maze.entrance.r][maze.entrance.c] = true;
+		
+		explored = new boolean[maze.sizeR][maze.sizeC];	
+		
+			if(maze.entrance.c == 0 && maze.entrance.r == 0){
+				explored[maze.entrance.r+1][maze.entrance.c+1/2] = true;
+				explored[maze.entrance.r+1][maze.entrance.c-1/2] = true;
+				explored[maze.entrance.r][maze.entrance.c+1] = true;
+			}else if(maze.entrance.c >0 && maze.entrance.r == 0){
+				explored[maze.entrance.r][maze.entrance.c+1] = true;
+				explored[maze.entrance.r][maze.entrance.c-1] = true;
+				explored[maze.entrance.r+1][maze.entrance.c+1/2] = true;
+				explored[maze.entrance.r+1][maze.entrance.c-1/2] = true;
+			}else if(maze.entrance.c == 0 && maze.entrance.r > 0){
+				explored[maze.entrance.r][maze.entrance.c+1] = true;
+				explored[maze.entrance.r+1][maze.entrance.c+1/2] = true;
+				explored[maze.entrance.r+1][maze.entrance.c-1/2] = true;
+				explored[maze.entrance.r-1][maze.entrance.c+1/2] = true;
+				explored[maze.entrance.r-1][maze.entrance.c-1/2] = true;
+			}else if(maze.entrance.r >0 && maze.entrance.c>0){
+				explored[maze.entrance.r][maze.entrance.c-1] = true;
+				explored[maze.entrance.r][maze.entrance.c+1] = true;
+				explored[maze.entrance.r+1][maze.entrance.c+1/2] = true;
+				explored[maze.entrance.r+1][maze.entrance.c-1/2] = true;
+				explored[maze.entrance.r-1][maze.entrance.c+1/2] = true;
+				explored[maze.entrance.r-1][maze.entrance.c-1/2] = true;
+							
+			}
+			
+			
+			
+			
 		int visits = 0;
 		
 		//maze.entrance.isVisited = true;
-		System.out.println("Cell Location is : " + maze.entrance.c + ", " + maze.entrance.r);
+		System.out.println("Cell Location is : " + maze.entrance.r + ", " + maze.entrance.c);
  
 		//available neighbor of cell
 		ArrayList<Cell> temp = new ArrayList<>();
 		//create frontier to store all neighbors
 		ArrayList<Cell> frontier = new ArrayList<>();
+		Cell nextMove = new Cell();
 		
 		switch(maze.type){
 //--------------------------------------HEX type---------------------------------------		
-	
 		case HEX:
+			
+			for (int i = 0; i < 6; i++) {
+				if (maze.entrance.neigh[i] != null) {
+					frontier.add(maze.entrance.neigh[i]);
+				}
+			}
 			
 			while (visits < visitedCount || !C.isEmpty()){
 				while((cell.c+ (1/2) < maze.sizeC && !visited[cell.r][cell.c+ (1/2)])||
@@ -49,37 +84,287 @@ public class ModifiedPrimsGenerator implements MazeGenerator {
 				      (cell.r+1 < maze.sizeR && !visited[cell.r+1][cell.c])||
 					  (cell.r-1 >= 0 && !visited[cell.r-1][cell.c])) {
 							int HexRand	= (int)(Math.random()* 6);
-							System.out.println("Direction: " + HexRand + " x: " + (cell.c+ 1/2) + " y: " + cell.r);
+							System.out.println("Direction: " + HexRand + " Row: " + cell.r + " Column: " + (cell.c+ 1));
 							System.out.println("---------------------------------------------------------");
 			
-						//check East
-						//same row, one cell right, so + 1
-						//East
-							if (HexRand == 0 && cell.c+1 < maze.sizeR && !visited[cell.r][(cell.c+1/2)]) {
-								for (int i = 0; i < 6; i++) {
-									if (maze.entrance.neigh[i] != null) {
-										frontier.add(maze.entrance.neigh[i]);
-									}
+							 //check East
+							 //same row, one cell right, so + 1
+							 if (HexRand == 0 && cell.c+1 < maze.sizeC && !visited[cell.r][(cell.c+1)]) {
+										
+								 
+								 
+								 		// remove the east wall  
+										maze.map[cell.r][cell.c].wall[EAST].present = false;						
+										//6 directions of cell
+										Cell nxCellE  = new Cell(cell.r,   cell.c+1);
+										Cell nxCellNE = new Cell(cell.r+1, cell.c+1/2);
+										Cell nxCellNW = new Cell(cell.r+1, cell.c-1/2);
+										Cell nxCellW  = new Cell(cell.r,   cell.c-1);
+										Cell nxCellSW = new Cell(cell.r-1, cell.c-1/2);
+										Cell nxCellSE = new Cell(cell.r-1, cell.c+1/2);
+										
+											
+										temp.add(nxCellE);
+										temp.add(nxCellNE);
+										temp.add(nxCellNW);
+										temp.add(nxCellW);
+										temp.add(nxCellSW); 
+										temp.add(nxCellSE);
+										
+										int index = random.nextInt(temp.size());
+										nextMove = temp.get(index);
+										visited[cell.r][cell.c+1] = true;
+										
+
+										
+										C.add(nextMove);
+										visits++;
+										cell = nextMove;
+										
 								}
-							// remove the east wall
-							maze.map[cell.r][cell.c].wall[EAST].present = false;
-							Cell nxCellE = new Cell(cell.r, cell.c+1);
-							Cell nxCellNE = new Cell(cell.r, cell.c+1);
-							Cell nxCellNW = new Cell(cell.r, cell.c+1);
-							Cell nxCellW = new Cell(cell.r, cell.c+1);
-							Cell nxCellSW = new Cell(cell.r, cell.c+1);
-							Cell nxCellSE = new Cell(cell.r, cell.c+1);
 							
-							visited[cell.r][cell.c+1] = true;
-							temp.add(nxCellE);
-							temp.add(nxCellNE);
-							temp.add(nxCellNW);
-							temp.add(nxCellW);
-							temp.add(nxCellSW);
-							temp.add(nxCellSE);
-							visits++;
-							cell = get(random.);
-						}
+							
+								//check NorthEast
+								//one row up + 1, half cell right + 1/2
+								if (HexRand == 2 && cell.c+1 < maze.sizeC && cell.r+1 < maze.sizeR && !visited[cell.r+1][(cell.c+1/2)]) {
+									if(!explored[cell.r+1][cell.c+1/2] || 
+										!explored[cell.r+1][cell.c-1/2] ||
+										!explored[cell.r-1][cell.c+1/2] ||
+										!explored[cell.r-1][cell.c-1/2] ||
+										!explored[cell.r][cell.c+1] ||
+										!explored[cell.r][cell.c-1]){
+										
+									 
+											// remove the east wall  
+											maze.map[cell.r][cell.c].wall[NORTHEAST].present = false;						
+											//6 directions of cell
+											Cell nxCellE  = new Cell(cell.r,   cell.c+1);
+											Cell nxCellNE = new Cell(cell.r+1, cell.c+1/2);
+											Cell nxCellNW = new Cell(cell.r+1, cell.c-1/2);
+											Cell nxCellW  = new Cell(cell.r,   cell.c-1);
+											Cell nxCellSW = new Cell(cell.r-1, cell.c-1/2);
+											Cell nxCellSE = new Cell(cell.r-1, cell.c+1/2);
+											
+												
+											temp.add(nxCellE);
+											temp.add(nxCellNE);
+											temp.add(nxCellNW);
+											temp.add(nxCellW);
+											temp.add(nxCellSW); 
+											temp.add(nxCellSE);
+											
+											int index = random.nextInt(temp.size());
+											nextMove = temp.get(index);
+											visited[cell.r+1][cell.c+1/2] = true;
+											
+											explored[cell.r][cell.c+1] = true;
+											explored[cell.r+1][cell.c+1/2] = true;
+											explored[cell.r+1][cell.c-1/2] = true;
+											explored[cell.r][cell.c-1] = true;
+											explored[cell.r-1][cell.c-1/2] = true;
+											explored[cell.r-1][cell.c+1/2] = true;
+											
+											C.add(nextMove);
+											visits++;
+											cell = nextMove;
+											}
+									}
+							
+							
+									//check NorthWest
+									//one row up + 1, half cell left - 1/2
+									if (HexRand == 3 && cell.c-1 >= 0 && cell.r+1 < maze.sizeR && !visited[cell.r+1][(cell.c-1/2)]) {
+										if(!explored[cell.r+1][cell.c+1/2] || 
+											!explored[cell.r+1][cell.c-1/2] ||
+											!explored[cell.r-1][cell.c+1/2] ||
+											!explored[cell.r-1][cell.c-1/2] ||
+											!explored[cell.r][cell.c+1] ||
+											!explored[cell.r][cell.c-1]){
+											
+										 
+												// remove the east wall  
+												maze.map[cell.r][cell.c].wall[NORTHWEST].present = false;						
+												//6 directions of cell
+												Cell nxCellE  = new Cell(cell.r,   cell.c+1);
+												Cell nxCellNE = new Cell(cell.r+1, cell.c+1/2);
+												Cell nxCellNW = new Cell(cell.r+1, cell.c-1/2);
+												Cell nxCellW  = new Cell(cell.r,   cell.c-1);
+												Cell nxCellSW = new Cell(cell.r-1, cell.c-1/2);
+												Cell nxCellSE = new Cell(cell.r-1, cell.c+1/2);
+												
+													
+												temp.add(nxCellE);
+												temp.add(nxCellNE);
+												temp.add(nxCellNW);
+												temp.add(nxCellW);
+												temp.add(nxCellSW); 
+												temp.add(nxCellSE);
+												
+												int index = random.nextInt(temp.size());
+												nextMove = temp.get(index);
+												visited[cell.r+1][cell.c-1/2] = true;
+												
+												explored[cell.r][cell.c+1] = true;
+												explored[cell.r+1][cell.c+1/2] = true;
+												explored[cell.r+1][cell.c-1/2] = true;
+												explored[cell.r][cell.c-1] = true;
+												explored[cell.r-1][cell.c-1/2] = true;
+												explored[cell.r-1][cell.c+1/2] = true;
+												
+												C.add(nextMove);
+												visits++;
+												cell = nextMove;
+												}
+										}
+							
+										
+									//check West
+									//same row, half cell left - 1/2
+									if (HexRand == 4 && cell.c-1 >= 0 && !visited[cell.r][(cell.c-1)]) {
+										if(!explored[cell.r+1][cell.c+1/2] || 
+											!explored[cell.r+1][cell.c-1/2] ||
+											!explored[cell.r-1][cell.c+1/2] ||
+											!explored[cell.r-1][cell.c-1/2] ||
+											!explored[cell.r][cell.c+1] ||
+											!explored[cell.r][cell.c-1]){
+											
+										 
+												// remove the east wall  
+												maze.map[cell.r][cell.c].wall[WEST].present = false;						
+												//6 directions of cell
+												Cell nxCellE  = new Cell(cell.r,   cell.c+1);
+												Cell nxCellNE = new Cell(cell.r+1, cell.c+1/2);
+												Cell nxCellNW = new Cell(cell.r+1, cell.c-1/2);
+												Cell nxCellW  = new Cell(cell.r,   cell.c-1);
+												Cell nxCellSW = new Cell(cell.r-1, cell.c-1/2);
+												Cell nxCellSE = new Cell(cell.r-1, cell.c+1/2);
+												
+													
+												temp.add(nxCellE);
+												temp.add(nxCellNE);
+												temp.add(nxCellNW);
+												temp.add(nxCellW);
+												temp.add(nxCellSW); 
+												temp.add(nxCellSE);
+												
+												int index = random.nextInt(temp.size());
+												nextMove = temp.get(index);
+												visited[cell.r][cell.c-1] = true;
+												
+												explored[cell.r][cell.c+1] = true;
+												explored[cell.r+1][cell.c+1/2] = true;
+												explored[cell.r+1][cell.c-1/2] = true;
+												explored[cell.r][cell.c-1] = true;
+												explored[cell.r-1][cell.c-1/2] = true;
+												explored[cell.r-1][cell.c+1/2] = true;
+												
+												C.add(nextMove);
+												visits++;
+												cell = nextMove;
+												}
+										}
+									
+									
+									
+										//check SouthWest
+										//same row down -1, half cell left - 1/2
+										if (HexRand == 5 && cell.c-1/2 >= 0 && cell.r-1>=0 && !visited[cell.r-1][(cell.c-1/2)]) {
+											if(!explored[cell.r+1][cell.c+1/2] || 
+												!explored[cell.r+1][cell.c-1/2] ||
+												!explored[cell.r-1][cell.c+1/2] ||
+												!explored[cell.r-1][cell.c-1/2] ||
+												!explored[cell.r][cell.c+1] ||
+												!explored[cell.r][cell.c-1]){
+												
+											 
+													// remove the east wall  
+													maze.map[cell.r][cell.c].wall[SOUTHWEST].present = false;						
+													//6 directions of cell
+													Cell nxCellE  = new Cell(cell.r,   cell.c+1);
+													Cell nxCellNE = new Cell(cell.r+1, cell.c+1/2);
+													Cell nxCellNW = new Cell(cell.r+1, cell.c-1/2);
+													Cell nxCellW  = new Cell(cell.r,   cell.c-1);
+													Cell nxCellSW = new Cell(cell.r-1, cell.c-1/2);
+													Cell nxCellSE = new Cell(cell.r-1, cell.c+1/2);
+													
+														
+													temp.add(nxCellE);
+													temp.add(nxCellNE);
+													temp.add(nxCellNW);
+													temp.add(nxCellW);
+													temp.add(nxCellSW); 
+													temp.add(nxCellSE);
+													
+													int index = random.nextInt(temp.size());
+													nextMove = temp.get(index);
+													visited[cell.r-1][cell.c-1/2] = true;
+													
+													explored[cell.r][cell.c+1] = true;
+													explored[cell.r+1][cell.c+1/2] = true;
+													explored[cell.r+1][cell.c-1/2] = true;
+													explored[cell.r][cell.c-1] = true;
+													explored[cell.r-1][cell.c-1/2] = true;
+													explored[cell.r-1][cell.c+1/2] = true;
+													
+													C.add(nextMove);
+													visits++;
+													cell = nextMove;
+													}
+											}
+										
+										
+										
+											//check SouthWest
+											//same row down -1, half cell left - 1/2
+											if (HexRand == 6 && cell.c+1/2 <maze.sizeC && cell.r-1>=0 && !visited[cell.r-1][(cell.c+1/2)]) {
+												if(!explored[cell.r+1][cell.c+1/2] || 
+													!explored[cell.r+1][cell.c-1/2] ||
+													!explored[cell.r-1][cell.c+1/2] ||
+													!explored[cell.r-1][cell.c-1/2] ||
+													!explored[cell.r][cell.c+1] ||
+													!explored[cell.r][cell.c-1]){
+													
+												 
+														// remove the east wall  
+														maze.map[cell.r][cell.c].wall[SOUTHWEST].present = false;						
+														//6 directions of cell
+														Cell nxCellE  = new Cell(cell.r,   cell.c+1);
+														Cell nxCellNE = new Cell(cell.r+1, cell.c+1/2);
+														Cell nxCellNW = new Cell(cell.r+1, cell.c-1/2);
+														Cell nxCellW  = new Cell(cell.r,   cell.c-1);
+														Cell nxCellSW = new Cell(cell.r-1, cell.c-1/2);
+														Cell nxCellSE = new Cell(cell.r-1, cell.c+1/2);
+														
+															
+														temp.add(nxCellE);
+														temp.add(nxCellNE);
+														temp.add(nxCellNW);
+														temp.add(nxCellW);
+														temp.add(nxCellSW); 
+														temp.add(nxCellSE);
+														
+														int index = random.nextInt(temp.size());
+														nextMove = temp.get(index);
+														visited[cell.r-1][cell.c+1/2] = true;
+														
+														explored[cell.r][cell.c+1] = true;
+														explored[cell.r+1][cell.c+1/2] = true;
+														explored[cell.r+1][cell.c-1/2] = true;
+														explored[cell.r][cell.c-1] = true;
+														explored[cell.r-1][cell.c-1/2] = true;
+														explored[cell.r-1][cell.c+1/2] = true;
+														
+														C.add(nextMove);
+														visits++;
+														cell = nextMove;
+														}
+												}
+								
+							
+							
+							
+							
+						
 				}
 			
 //				for (int i = 0; i < 6; i++) {
@@ -193,8 +478,8 @@ public class ModifiedPrimsGenerator implements MazeGenerator {
 	//			}
 	//			System.out.println();
 	
-				frontier.remove(neighborF);
-				System.out.println("neighor selected: " + neighborF.c + ", " + neighborF.r);
+				frontier.remove(neighborF); 
+				System.out.println("neighor selected: " + neighborF.r + ", " + neighborF.c);
 				neighborF.isVisited = true;
 	
 				//find available neighbor of current neighbourF
@@ -227,7 +512,7 @@ public class ModifiedPrimsGenerator implements MazeGenerator {
 	
 				//Add cell to Cell set C
 				C.add(neighborF);
-				System.out.println("Moved to x: " + neighborF.c + " y: " + neighborF.r);
+				System.out.println("Moved to Row: " + neighborF.r + " Column: " + neighborF.c);
 	
 				boolean isDuplicate = false;
 				for (int i = 0; i < temp.size(); i++) {
