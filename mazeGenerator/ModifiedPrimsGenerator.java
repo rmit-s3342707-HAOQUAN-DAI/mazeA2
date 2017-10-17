@@ -26,11 +26,6 @@ public class ModifiedPrimsGenerator implements MazeGenerator {
 		//C.add(maze.entrance); //add to cell
 		visited = new boolean[maze.sizeR][maze.sizeC];
 		visited[maze.entrance.r][maze.entrance.c] = true;
-		
-			
-			
-			
-			
 		int visits = 0;
 		
 		//maze.entrance.isVisited = true;

@@ -23,52 +23,51 @@ public class GrowingTreeGenerator implements MazeGenerator {
 			}
 		}
 
-		// Add entrance to the cell list
-		System.out.println("The entrance of maze is: " + maze.entrance.c + ", " + maze.entrance.r);
-		cells.add(maze.entrance);
+		// Set random cell as the starting point
+        Cell startCell = new Cell((int)(Math.random() * maze.sizeR), (int)(Math.random() * maze.sizeC));
+		System.out.println("The entrance of maze is: " + startCell.c + ", " + startCell.r);
+		cells.add(startCell);
 		// maze entrance is visited.
-		visited[maze.entrance.r][maze.entrance.c] = 1;
+		visited[startCell.r][startCell.c] = 1;
 
 		// start of growing tree algorithm
-//		while (cells.size() > 0) {
-		for (int n = 0; n < 25; n++) {
-			if (cells.size() > 0) {
-				// backtrack to newest cell
-				int index = cells.size() - 1;
-				Cell cell = (Cell) cells.get(index);
+		while (cells.size() > 0) {
+			// backtrack to newest cell
+//			int index = cells.size() - 1;
+            int index = chooseIndex(cells);
+			Cell cell = (Cell) cells.get(index);
 //				System.out.println("index; " + index);
-				int x = cell.c;
-				int y = cell.r;
+			int x = cell.c;
+			int y = cell.r;
 
-				// shuffle possible directions
+			// shuffle possible directions
 //				System.out.println("The maze type is:" + maze.type);
-				if (maze.type == NORMAL) {
-					Integer[] directions = new Integer[4];
-					directions[0] = new Integer(EAST);
-					directions[1] = new Integer(NORTH);
-					directions[2] = new Integer(WEST);
-					directions[3] = new Integer(SOUTH);
-					java.util.Collections.shuffle(java.util.Arrays.asList(directions));
+			if (maze.type == NORMAL) {
+				Integer[] directions = new Integer[4];
+				directions[0] = new Integer(EAST);
+				directions[1] = new Integer(NORTH);
+				directions[2] = new Integer(WEST);
+				directions[3] = new Integer(SOUTH);
+				java.util.Collections.shuffle(java.util.Arrays.asList(directions));
 
-					digPass(4, x, y, maze, index, cells, directions);
-				} else if (maze.type == HEX) {
-					Integer[] directions = new Integer[NUM_DIR];
-					for (int i = 0; i < NUM_DIR; ++i) {
-						directions[i] = new Integer(i);
-					}
-					java.util.Collections.shuffle(java.util.Arrays.asList(directions));
-
-					digPass(6, x, y, maze, index, cells, directions);
-				} else {
-					System.out.println("Unknown maze type.");
-					break;
+				digPass(4, x, y, maze, index, cells, directions);
+			} else if (maze.type == HEX) {
+				Integer[] directions = new Integer[NUM_DIR];
+				for (int i = 0; i < NUM_DIR; ++i) {
+					directions[i] = new Integer(i);
 				}
+				java.util.Collections.shuffle(java.util.Arrays.asList(directions));
+
+				digPass(6, x, y, maze, index, cells, directions);
+			} else {
+				System.out.println("Unknown maze type.");
+				break;
 			}
 		}
+
 	}
 
 	private void digPass(int dirNum, int x, int y, Maze maze, int index, ArrayList cells, Integer[] directions) {
-
 
 		// Try remove a wall of a random direction
 		for (int k = 0; k < dirNum; ++k) {
@@ -88,8 +87,10 @@ public class GrowingTreeGenerator implements MazeGenerator {
 //				System.out.println("Before: visited[ny][nx]: " + visited[ny][nx] + ", oppoDir: " + oppoDir[dir]);
 				visited[ny][nx] |= oppoDir[dir];
 //				System.out.println("After: visited[ny][nx]: " + visited[ny][nx]);
-				Cell currCell = new Cell(ny, nx);
-				cells.add(currCell);
+
+				cells.add(new Cell(ny, nx));
+				visited[ny][nx] = 1;
+				visited[ny][nx] = 1;
 //				maze.drawFtPrt(currCell);
 				index = -1;
 
@@ -98,14 +99,22 @@ public class GrowingTreeGenerator implements MazeGenerator {
 				if (maze.map[y][x].wall[dir] != null)
 					maze.map[y][x].wall[dir].present = false;
 				break;
-			} else {
-
 			}
 		}
 
+		System.out.println("index: " + index);
 		// dead end: remove cell from list
 		if (index != -1) {
 			cells.remove(index);
 		}
 	}
+
+	private int chooseIndex(ArrayList cells) {
+        Random rand = new Random();
+	    if (Math.random() > threshold) {
+	        return cells.size() - 1;
+        } else {
+            return rand.nextInt(cells.size());
+        }
+    }
 }

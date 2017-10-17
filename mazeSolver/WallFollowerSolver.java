@@ -1,79 +1,235 @@
 package mazeSolver;
 
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.ArrayList;
-import maze.Cell;
+import java.util.*;
 import maze.Maze;
+import maze.Cell;
 
 /**
  * Implements WallFollowerSolver
  */
 
 public class WallFollowerSolver implements MazeSolver {
-	
-//https://github.com/briankcook/Maze/blob/master/mazemaker/maze/solvers/WallFollower.java
+	LinkedList<Cell> queue = new LinkedList<Cell>();
+	private int exitR;
+	private int exitC;
 
-	
-//https://github.com/green131/maze-solver/blob/master/src/src/MazeSolver.java
-	
-	int[][] solution;
-	private int[][] visited; // track visited area in maze
-	private int[][] location;  // track current position in maze
-	
-	
 	@Override
 	public void solveMaze(Maze maze) {
-		// TODO Auto-generated method stub
-		
-	
+		Cell c = new Cell();
+		c = maze.entrance;
+		maze.entrance.isVisited = true;
+		queue.add(c);
+		int direction = NORTH;
+
+		// random original direction can go
+		for (int i = 0; i < NUM_DIR; ++i) {
+			if (i == 1 || i == 4)
+				continue;
+			if (c.neigh[i] != null) {
+				// if can move to the direction
+				if (!c.wall[i].present) {
+					// move to the neighbour cell
+					direction = i;
+					c = c.neigh[i];
+					queue.add(c);
+					break;
+				}
+			}
+		}
+
+		System.out.println("original dir: " + direction);
+
+		while(c.c != maze.exit.c || c.r != maze.exit.r) {
+
+			System.out.print(c.c == maze.exit.c && c.r == maze.exit.r);
+
+			for (int i = 0; i < NUM_DIR; ++i) {
+				if (i == 1 || i == 4)
+					continue;
+				if (c.neigh[i] != null) {
+					if (direction == EAST) {
+						// try to turn left
+						direction = NORTH;
+						if (!c.wall[direction].present) {
+
+							System.out.println("               next direction: " + direction);
+
+							c = c.neigh[direction];
+							queue.add(c);
+							break;
+						}
+						// else try direct
+						direction = EAST;
+						if (!c.wall[direction].present) {
+
+							System.out.println("               next direction: " + direction);
+
+							c = c.neigh[direction];
+							queue.add(c);
+							break;
+						}
+						// else try to turn right
+						direction = SOUTH;
+						if (!c.wall[direction].present) {
+
+							System.out.println("               next direction: " + direction);
+
+							c = c.neigh[direction];
+							queue.add(c);
+							break;
+						}
+						// else -> no way to go, turn back
+						direction = WEST;
+						if (!c.wall[direction].present) {
+
+							System.out.println("               next direction: " + direction);
+
+							queue.remove(c);
+							c = c.neigh[direction];
+							break;
+						}
+					}
+					if (direction == SOUTH) {
+						// try to turn left
+						direction = EAST;
+						if (!c.wall[direction].present) {
+
+							System.out.println("               next direction: " + direction);
+
+							c = c.neigh[direction];
+							queue.add(c);
+							break;
+						}
+						// else try direct
+						direction = SOUTH;
+						if (!c.wall[direction].present) {
+
+							System.out.println("               next direction: " + direction);
+
+							c = c.neigh[direction];
+							queue.add(c);
+							break;
+						}
+						// else try to turn right
+						direction = WEST;
+						if (!c.wall[direction].present) {
+
+							System.out.println("               next direction: " + direction);
+
+							c = c.neigh[direction];
+							queue.add(c);
+							break;
+						}
+						// else -> no way to go, turn back
+						direction = NORTH;
+						if (!c.wall[direction].present) {
+
+							System.out.println("               next direction: " + direction);
+
+							queue.remove(c);
+							c = c.neigh[direction];
+							break;
+						}
+					}
+					if (direction == WEST) {
+						direction = SOUTH;
+						if (!c.wall[direction].present) {
+
+							System.out.println("               next direction: " + direction);
+
+							c = c.neigh[direction];
+							queue.add(c);
+							break;
+						}
+						direction = WEST;
+						if (!c.wall[direction].present) {
+
+							System.out.println("               next direction: " + direction);
+
+							c = c.neigh[direction];
+							queue.add(c);
+							break;
+						}
+						direction = NORTH;
+						if (!c.wall[direction].present) {
+
+							System.out.println("               next direction: " + direction);
+
+							c = c.neigh[direction];
+							queue.add(c);
+							break;
+						}
+						direction = EAST;
+						if (!c.wall[direction].present) {
+
+							System.out.println("               next direction: " + direction);
+
+							queue.remove(c);
+							c = c.neigh[direction];
+							break;
+						}
+					}
+					if (direction == NORTH) {
+						direction = WEST;
+						if (!c.wall[direction].present) {
+
+							System.out.println("               next direction: " + direction);
+
+							c = c.neigh[direction];
+							queue.add(c);
+							break;
+						}
+						direction = NORTH;
+						if (!c.wall[direction].present) {
+
+							System.out.println("               next direction: " + direction);
+
+							c = c.neigh[direction];
+							queue.add(c);
+							break;
+						}
+						direction = EAST;
+						if (!c.wall[direction].present) {
+
+							System.out.println("               next direction: " + direction);
+
+							c = c.neigh[direction];
+							queue.add(c);
+							break;
+						}
+						direction = SOUTH;
+						if (!c.wall[direction].present) {
+
+							System.out.println("               next direction: " + direction);
+
+							queue.remove(c);
+							c = c.neigh[direction];
+							break;
+						}
+					}
+				}
+			}
+		}
+
+		for (int i = 0; i < queue.size(); ++i) {
+			maze.drawFtPrt(queue.get(i));
+		}
+
+		// preparation for isSolved()
+		exitR = maze.exit.r;
+		exitC = maze.exit.c;
 	} // end of solveMaze()
-	
-	
-	
 
 	@Override
 	public boolean isSolved() {
-		// TODO Auto-generated method stub
+		if(queue.get(queue.size() - 1).r == exitR && queue.get(queue.size() - 1).c == exitC)
+			return true;
 		return false;
 	} // end if isSolved()
     
-    
 	@Override
 	public int cellsExplored() {
-		// TODO Auto-generated method stub
-		return 0;
+		return queue.size();
 	} // end of cellsExplored()
 
 } // end of class WallFollowerSolver
-
-//------------------example 1 ends----------------------------
-
-
-//-------------------------example 2-----------------------------------
-
-//public class WallFollowerSolver implements MazeSolver {
-//	
-//	
-//	
-//	@Override
-//	public void solveMaze(Maze maze) {
-//		// TODO Auto-generated method stub
-//        
-//	} // end of solveMaze()
-//    
-//    
-//	@Override
-//	public boolean isSolved() {
-//		// TODO Auto-generated method stub
-//		return false;
-//	} // end if isSolved()
-//    
-//    
-//	@Override
-//	public int cellsExplored() {
-//		// TODO Auto-generated method stub
-//		return 0;
-//	} // end of cellsExplored()
-//
-//} // end of class WallFollowerSolver
