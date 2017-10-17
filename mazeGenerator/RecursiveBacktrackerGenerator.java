@@ -11,33 +11,42 @@ public class RecursiveBacktrackerGenerator implements MazeGenerator {
 	@Override
 	public void generateMaze(Maze maze) {
 		ArrayDeque<Cell> q = new ArrayDeque<>();//save the visited cell
-		Cell cell = new Cell(maze.entrance.r, maze.entrance.c);
+		Cell cell = new Cell(maze.entrance.r, maze.entrance.c+(maze.entrance.r+1)/2);
 		q.push(cell);
 		visited = new boolean[maze.sizeR][maze.sizeC];
-		visited[maze.entrance.r][maze.entrance.c] = true;
+		visited[maze.entrance.r][maze.entrance.c+(maze.entrance.r+1)/2] = true;
 		int visits = 0;
 		
-		
-		
+		// map = new Cell[sizeR][sizeC + (sizeR + 1) / 2];  <---------!!
+//		if (isIn(entR, entC + (entR + 1) / 2))
+//			entrance = map[entR][entC + (entR + 1) / 2];
+		// e.g., the northeast neighbor of map[r][c] would be map[r + deltaR[NORTHEAST][c + deltaC[NORTHEAST]]		
+		//public final static int deltaR[] = { 0, 1, 1, 0, -1, -1 };
+		//public final static int deltaC[] = { 1, 1, 0, -1, -1, 0 };
+		//public final static int oppoDir[] = { 3, 4, 5, 0, 1, 2 };
+
 		if(maze.type == HEX){
-			
+			System.out.println("generating hex maze---------------------------------------------------");
+			System.out.println("Maze size: " + maze.sizeR + " * " + (maze.sizeC+(maze.entrance.r+1)/2));
 			while (visits < visitedCount || !q.isEmpty()){
-				while((cell.c+ (1/2) < maze.sizeC && !visited[cell.r][cell.c+ (1/2)])||
-					  (cell.c-(1/2) >= 0 && !visited[cell.r][cell.c-(1/2)])||
-				      (cell.r+1 < maze.sizeR && !visited[cell.r+1][cell.c])||
-					  (cell.r-1 >= 0 && !visited[cell.r-1][cell.c])) {
+				while((cell.c+(cell.r+1)/2  < maze.sizeC && !visited[cell.r][cell.c+(cell.r+1)/2])||
+					  (cell.c-(cell.r+1)/2  >= 0 && !visited[cell.r][cell.c-(cell.r+1)/2])||
+				      (cell.r+1 < maze.sizeR && !visited[cell.r+deltaR[NORTHEAST]][cell.c+deltaC[NORTHEAST]])||
+				      (cell.r+1 < maze.sizeR && !visited[cell.r+deltaR[NORTHWEST]][cell.c-deltaC[NORTHWEST]])||
+				      (cell.r-1 >= 0 && !visited[cell.r-deltaR[SOUTHWEST]][cell.c-deltaC[SOUTHWEST]])||
+					  (cell.r-1 >= 0 && !visited[cell.r-deltaR[SOUTHEAST]][cell.c-deltaC[SOUTHEAST]])) {
 							int HexRand	= (int)(Math.random()* 6 + 1);
-							System.out.println("Direction: " + HexRand + " x: " + (cell.c+ 1/2) + " y: " + cell.r);
+							System.out.println("Current Row: " + cell.r + " " + "Current Column: " + cell.c + " " + "Next Direction: " + HexRand);
 							System.out.println("---------------------------------------------------------");
 			
 						//check East
 						//same row, one cell right, so + 1
-						if (HexRand == 1 && cell.c+1 < maze.sizeR && !visited[cell.r][(cell.c+1/2)]) {
+						if (HexRand == 1 && (cell.c+(cell.r+1)/2  < maze.sizeC && !visited[cell.r][cell.c+(cell.r+1)/2])){
 							// remove the east wall
 							
 							maze.map[cell.r][cell.c].wall[EAST].present = false;
-							Cell nxCell = new Cell(cell.r, cell.c+1);
-							visited[cell.r][cell.c+1] = true;
+							Cell nxCell = new Cell(cell.r, cell.c+(cell.r+1)/2);
+							visited[cell.r][cell.c+(cell.r+1)/2] = true;
 							q.add(nxCell);
 							visits++;
 							cell = nxCell;
@@ -46,11 +55,15 @@ public class RecursiveBacktrackerGenerator implements MazeGenerator {
 						
 						//check NorthEast
 						//one row up, half cell right, so r + 1, c + 1/2
-						if (HexRand == 2 && cell.r+1 < maze.sizeR && !visited[cell.r+1][cell.c+(1/2)]) {
+						if (HexRand == 2 && cell.r+deltaR[NORTHEAST] < maze.sizeR && cell.c+deltaC[NORTHEAST] < maze.sizeC && !visited[cell.r+deltaR[NORTHEAST]][cell.c+deltaC[NORTHEAST]]) {
 							// remove the northeast wall  
-							maze.map[cell.r][cell.c].wall[NORTHEAST].present = false;
-							Cell nxCell = new Cell(cell.r+1, cell.c+(1/2));
-							visited[cell.r+1][cell.c+(1/2)] = true;
+							if(cell.c-((cell.r+1)/2) ==maze.sizeC && cell.r%2 == 1){
+								break;
+							}else{
+								maze.map[cell.r][cell.c].wall[NORTHEAST].present = false;
+							}
+							Cell nxCell = new Cell(cell.r+deltaR[NORTHEAST], cell.c+deltaC[NORTHEAST]);
+							visited[cell.r+deltaR[NORTHEAST]][cell.c+deltaC[NORTHEAST]] = true;
 							q.add(nxCell);
 							visits++; 
 							cell = nxCell;
@@ -58,11 +71,15 @@ public class RecursiveBacktrackerGenerator implements MazeGenerator {
 						
 						//check NorthWest
 						//one row up, half cell left
-						if (HexRand == 3 && cell.r+1 < maze.sizeR && !visited[cell.r+1][cell.c-(1/2)]) {
+						if (HexRand == 3 && cell.r+deltaR[NORTHWEST] < maze.sizeR && cell.c-deltaC[NORTHEAST] <=0 && !visited[cell.r+deltaR[NORTHWEST]][cell.c-deltaC[NORTHEAST]]) {
 							// remove the northwest wall
-							maze.map[cell.r][cell.c].wall[NORTHWEST].present = false;
-							Cell nxCell = new Cell(cell.r+1, cell.c-(1/2));
-							visited[cell.r+1][cell.c+(1/2)] = true;
+							if(cell.c == 0 && cell.r%2 == 0){
+								break;
+							}else{
+								maze.map[cell.r][cell.c].wall[NORTHWEST].present = false;
+							}
+							Cell nxCell = new Cell(cell.r+deltaR[NORTHWEST], cell.c-deltaC[NORTHEAST]);
+							visited[cell.r+deltaR[NORTHWEST]][cell.c-deltaC[NORTHEAST]] = true;
 							q.add(nxCell);
 							visits++;  
 							cell = nxCell;
@@ -71,11 +88,11 @@ public class RecursiveBacktrackerGenerator implements MazeGenerator {
 						
 						//check West
 						//same row, one cell left
-						if (HexRand == 4 && cell.c-1 >= 0 && !visited[cell.r][cell.c-1]) {
+						if (HexRand == 4 && cell.c-1 >= 0 && !visited[cell.r][cell.c-(cell.r+1)/2 ]) {
 							// remove the west wall
 							maze.map[cell.r][cell.c].wall[WEST].present = false; 
-							Cell nxCell = new Cell(cell.r, cell.c-1);
-							visited[cell.r][cell.c-1] = true;
+							Cell nxCell = new Cell(cell.r, cell.c-(cell.r+1)/2);
+							visited[cell.r][cell.c-(cell.r+1)/2] = true;
 							q.add(nxCell);
 							visits++;
 							cell = nxCell;
@@ -83,23 +100,31 @@ public class RecursiveBacktrackerGenerator implements MazeGenerator {
 						   
 						//check SouthWest
 						//one row down, half cell left
-						if (HexRand == 5 && cell.c-(1/2) >= 0 && !visited[cell.r-1][cell.c-(1/2)]) {
+						if (HexRand == 5 && cell.c-deltaC[SOUTHWEST] >= 0 && cell.r-1 >=0 && !visited[cell.r-deltaR[SOUTHWEST]][cell.c-deltaC[SOUTHWEST]]) {
 							// remove the west wall
-							maze.map[cell.r][cell.c].wall[SOUTHWEST].present = false;
-							Cell nxCell = new Cell(cell.r-1, cell.c-(1/2));
-							visited[cell.r][cell.c-(1/2)] = true;
+							if(cell.c==0 && cell.r%2==0){
+								break;
+							}else{
+								maze.map[cell.r][cell.c].wall[SOUTHWEST].present = false;
+							}
+							Cell nxCell = new Cell(cell.r-deltaR[SOUTHWEST],cell.c-deltaC[SOUTHWEST]);
+							visited[cell.r-deltaR[SOUTHWEST]][cell.c-deltaC[SOUTHWEST]] = true;
 							q.add(nxCell);
 							visits++;
-							cell = nxCell;
+							cell = nxCell; 
 						}
 						
 						//check SouthEast
 						//one row down, half cell right
-						if (HexRand == 5 && cell.c+(1/2) >= 0 && !visited[cell.r-1][cell.c+(1/2)]) {
+						if (HexRand == 6 && cell.c+deltaC[SOUTHEAST] < maze.sizeC && cell.r-1 >=0 && !visited[cell.r-deltaR[SOUTHEAST]][cell.c+deltaC[SOUTHEAST]]) {
 							// remove the west wall
-							maze.map[cell.r][cell.c].wall[SOUTHEAST].present = false;
-							Cell nxCell = new Cell(cell.r-1, cell.c+(1/2));
-							visited[cell.r][cell.c+(1/2)] = true;
+							if(cell.c-1 == maze.sizeC && cell.r%2==1){
+								break;
+							}else{
+								maze.map[cell.r][cell.c].wall[SOUTHEAST].present = false;
+							}
+							Cell nxCell = new Cell(cell.r-deltaR[SOUTHEAST], cell.c+deltaC[SOUTHEAST]);
+							visited[cell.r-deltaR[SOUTHEAST]][cell.c+deltaC[SOUTHEAST]] = true;
 							q.add(nxCell);
 							visits++;
 							cell = nxCell;
@@ -133,7 +158,7 @@ public class RecursiveBacktrackerGenerator implements MazeGenerator {
 						q.add(nxCell);
 						visits++;
 						cell = nxCell;
-					}
+					} 
 					// check down  
 					if (rand == 2 && cell.r-1 >= 0 && !visited[cell.r-1][cell.c]) {
 						// remove the wall below
@@ -152,7 +177,7 @@ public class RecursiveBacktrackerGenerator implements MazeGenerator {
 						visited[cell.r][cell.c-1] = true;
 						q.add(nxCell);
 						visits++;
-						cell = nxCell;
+						cell = nxCell; 
 					}
 					// check right
 					if (rand == 4 && cell.c+1 < maze.sizeC && !visited[cell.r][cell.c+1]) {
