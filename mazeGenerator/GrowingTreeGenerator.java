@@ -10,111 +10,123 @@ public class GrowingTreeGenerator implements MazeGenerator {
 
 	double threshold = 0.1;
 
-	private int[][] visited;
+	private Maze mMaze;
+	private boolean visitedCellsNormal[][];
+	private HashSet<Cell> visitedCellsHex;
+	private Cell currentCell;
+	private ArrayList<Cell> mazeCells;
+	private Random randomInt = new Random(System.currentTimeMillis());
 
+
+	/**
+	 * Generate a perfect maze
+	 */
 	@Override
 	public void generateMaze(Maze maze) {
-		ArrayList cells = new ArrayList();
-		visited = new int[maze.sizeR][maze.sizeC];
-		// initialize the grid
-		for (int i = 0; i < maze.sizeC; ++i) {
-			for (int j = 0; j < maze.sizeR; ++j) {
-				visited[j][i] = 0;
-			}
-		}
+		mMaze = maze;
+		visitedCellsNormal = new boolean[maze.sizeR][maze.sizeC];
+		visitedCellsHex = new HashSet<>();
 
-		// Set random cell as the starting point
-        Cell startCell = new Cell((int)(Math.random() * maze.sizeR), (int)(Math.random() * maze.sizeC));
-		System.out.println("The entrance of maze is: " + startCell.c + ", " + startCell.r);
-		cells.add(startCell);
-		// maze entrance is visited.
-		visited[startCell.r][startCell.c] = 1;
+		int randomNeighbor;
+		ArrayList<Cell> cellRepository = new ArrayList<>();
 
-		// start of growing tree algorithm
-		while (cells.size() > 0) {
-			// backtrack to newest cell
-//			int index = cells.size() - 1;
-            int index = chooseIndex(cells);
-			Cell cell = (Cell) cells.get(index);
-//				System.out.println("index; " + index);
-			int x = cell.c;
-			int y = cell.r;
+		// check if Normal or Hex
+		if ((mMaze.type == NORMAL) || (mMaze.type == HEX) ) {
 
-			// shuffle possible directions
-//				System.out.println("The maze type is:" + maze.type);
-			if (maze.type == NORMAL) {
-				Integer[] directions = new Integer[4];
-				directions[0] = new Integer(EAST);
-				directions[1] = new Integer(NORTH);
-				directions[2] = new Integer(WEST);
-				directions[3] = new Integer(SOUTH);
-				java.util.Collections.shuffle(java.util.Arrays.asList(directions));
+			// Select a random starting cell (b) and mark it as visited
+			selectStartingCellAndMarkVisited();
 
-				digPass(4, x, y, maze, index, cells, directions);
-			} else if (maze.type == HEX) {
-				Integer[] directions = new Integer[NUM_DIR];
-				for (int i = 0; i < NUM_DIR; ++i) {
-					directions[i] = new Integer(i);
+			// add the random starting cell (b) to temporary cell repository (Z)
+			cellRepository.add(currentCell);
+
+			while (cellRepository.size() > 0) {
+
+				// get random cell (b) from temporary cell repository (z) and set it as current cell
+				currentCell = cellRepository.get(randomInt.nextInt(cellRepository.size()));
+
+				// get unvisited neighbors of current cell (b)
+				ArrayList<Integer> unvisitedNeighbors = new ArrayList<>();
+				for (int i = 0; i < NUM_DIR; i++) {
+					Cell currentNeighbor = currentCell.neigh[i];
+					if (isCellInMazeAndNotVisited(currentNeighbor)) {
+						unvisitedNeighbors.add(i);
+					}
 				}
-				java.util.Collections.shuffle(java.util.Arrays.asList(directions));
 
-				digPass(6, x, y, maze, index, cells, directions);
-			} else {
-				System.out.println("Unknown maze type.");
-				break;
+				if (unvisitedNeighbors.size() > 0) {
+					// choose random neighbor of current cell (b)
+					randomNeighbor = unvisitedNeighbors.get(randomInt.nextInt(unvisitedNeighbors.size()));
+					// carve a path to random neighbor
+					currentCell.wall[randomNeighbor].present = false;
+					// add random neighbor to temporary cell repository(z)
+					cellRepository.add(currentCell.neigh[randomNeighbor]);
+					// mark random neighbor as visited
+					if (mMaze.type == NORMAL)
+						visitedCellsNormal[currentCell.neigh[randomNeighbor].r][currentCell.neigh[randomNeighbor].c] = true;
+					else
+						visitedCellsHex.add(currentCell.neigh[randomNeighbor]);
+
+				} else {
+					// if current cell (b) has no neighbor, remove it from temporary cell repository (z)
+					cellRepository.remove(currentCell);
+				}
+
+			} // repeat until temporary cell repository is empty
+
+		} // end of Normal and Hex
+
+
+	} // end of generateMaze()
+
+	/**
+	 * Randomly select a starting cell for the maze.
+	 */
+	private void selectStartingCellAndMarkVisited() {
+		if (mMaze.type == HEX) {
+
+			// get the size of the maze for Hex
+			mazeCells = new ArrayList<>();
+			for (int i = 0; i < mMaze.sizeR; i++) {
+				for (int j = (i + 1) / 2; j < mMaze.sizeC + (i + 1) / 2; j++) {
+					if (!isCellInMazeAndNotVisited(mMaze.map[i][j]))
+						continue;
+					mazeCells.add(mMaze.map[i][j]);
+				}
 			}
+			// select random cell
+			currentCell = mazeCells.get(randomInt.nextInt(mazeCells.size()));
+			// mark starting cell as visited
+			visitedCellsHex.add(currentCell);
+		} else if (mMaze.type == NORMAL) {
+			int row = randomInt.nextInt(mMaze.sizeR);
+			int col = randomInt.nextInt(mMaze.sizeC);
+			// select random cell
+			currentCell = mMaze.map[row][col];
+			// mark starting cell as visited
+			visitedCellsNormal[currentCell.r][currentCell.c] = true;
 		}
 
-	}
+	} // end of selectStartingCellAndMarkVisited()
 
-	private void digPass(int dirNum, int x, int y, Maze maze, int index, ArrayList cells, Integer[] directions) {
+	/**
+	 * Check whether the cell is in the maze and not yet visited.
+	 */
+	private boolean isCellInMazeAndNotVisited(Cell cell) {
 
-		// Try remove a wall of a random direction
-		for (int k = 0; k < dirNum; ++k) {
-			int dir = directions[k].intValue();
-			int nx = x + deltaC[dir];
-			int ny = y + deltaR[dir];
-			if (nx >= 0 && ny >= 0 && nx < maze.sizeC && ny < maze.sizeR && visited[ny][nx] == 0) {
-				System.out.println(directions[k] + ",:    " + " x: " + x + ", y: " + y + ", nx: " + nx + ", ny: " + ny);
-				System.out.println("--------");
-			}
-
-			// if new cell is unvisited carve passage
-			if (nx >= 0 && ny >= 0 && nx < maze.sizeC && ny < maze.sizeR && visited[ny][nx] == 0) {
-//				System.out.println("Before: visited[y][x]: " + visited[y][x] + ", dir: " + dir);
-				visited[y][x] |= dir;
-//				System.out.println("After: visited[y][x]: " + visited[y][x]);
-//				System.out.println("Before: visited[ny][nx]: " + visited[ny][nx] + ", oppoDir: " + oppoDir[dir]);
-				visited[ny][nx] |= oppoDir[dir];
-//				System.out.println("After: visited[ny][nx]: " + visited[ny][nx]);
-
-				cells.add(new Cell(ny, nx));
-				visited[ny][nx] = 1;
-				visited[ny][nx] = 1;
-//				maze.drawFtPrt(currCell);
-				index = -1;
-
-				Cell lastCell = new Cell(y, x);
-//				System.out.println("lastCell.wall[dir] != null = " + (maze.map[y][x].wall[dir] != null));
-				if (maze.map[y][x].wall[dir] != null)
-					maze.map[y][x].wall[dir].present = false;
-				break;
-			}
+		if (mMaze.type == HEX) {
+			return cell != null &&
+					!visitedCellsHex.contains(cell) &&
+					cell.r >= 0 &&
+					cell.r < mMaze.sizeR &&
+					cell.c >= (cell.r + 1) / 2 &&
+					cell.c < mMaze.sizeC + (cell.r + 1) / 2;
+		} else {
+			return cell != null &&
+					!visitedCellsNormal[cell.r][cell.c] &&
+					cell.r >= 0 &&
+					cell.r < mMaze.sizeR &&
+					cell.c >= 0 &&
+					cell.c < mMaze.sizeC;
 		}
-
-		System.out.println("index: " + index);
-		// dead end: remove cell from list
-		if (index != -1) {
-			cells.remove(index);
-		}
-	}
-
-	private int chooseIndex(ArrayList cells) {
-        Random rand = new Random();
-	    if (Math.random() > threshold) {
-	        return cells.size() - 1;
-        } else {
-            return rand.nextInt(cells.size());
-        }
-    }
+	} // end of isCellInMazeAndNotVisited
 }
